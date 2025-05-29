@@ -34,19 +34,19 @@
     <a href="livros/livro7.pdf" target="_blank" data-asmr-src="audios/page-turn-3.mp3"><img src="capas/livro7.jpg" alt="Livro 7"></a>
     <a href="livros/livro8.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro8.png" alt="Livro 8"></a>
     <a href="livros/livro9.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro9.png" alt="Livro 9"></a>
-<a href="livros/livro10.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro10.png" alt="Livro 10"></a>
-<a href="livros/livro11.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro11.png" alt="Livro 11"></a>
-<a href="livros/livro12.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro12.png" alt="Livro 12"></a>
-	  <a href="livros/livro13.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro13.png" alt="Livro 13"></a>
-<a href="livros/livro14.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro14.png" alt="Livro 14"></a>
-<a href="livros/livro15.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro15.png" alt="Livro 15"></a>
-<a href="livros/livro16.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro16.png" alt="Livro 16"></a>
-	  <a href="livros/livro17.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro17.png" alt="Livro 17"></a>
-<a href="livros/livro18.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro18.png" alt="Livro 18"></a>
-<a href="livros/livro19.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro19.png" alt="Livro 19"></a>
-<a href="livros/livro20.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro20.png" alt="Livro 20"></a>
+    <a href="livros/livro10.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro10.png" alt="Livro 10"></a>
+    <a href="livros/livro11.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro11.png" alt="Livro 11"></a>
+    <a href="livros/livro12.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro12.png" alt="Livro 12"></a>
+    <a href="livros/livro13.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro13.png" alt="Livro 13"></a>
+    <a href="livros/livro14.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro14.png" alt="Livro 14"></a>
+    <a href="livros/livro15.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro15.png" alt="Livro 15"></a>
+    <a href="livros/livro16.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro16.png" alt="Livro 16"></a>
+    <a href="livros/livro17.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro17.png" alt="Livro 17"></a>
+    <a href="livros/livro18.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro18.png" alt="Livro 18"></a>
+    <a href="livros/livro19.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro19.png" alt="Livro 19"></a>
+    <a href="livros/livro20.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro20.png" alt="Livro 20"></a>
 	
-    </section>
+  </section>
 
   <footer>
     Biblioteca Oculta
@@ -271,6 +271,7 @@
         const logoRotationDuration = 2.6; 
         let isSparkAnimating = false; 
         let mouseIsOverLogo = false; 
+        let sparkTimer; // Variável para armazenar o ID do timer
 
         if (!logo || !logoParticlesContainer) return;
 
@@ -283,7 +284,13 @@
 
             logo.style.transform = 'rotate(180deg) scale(1.5)';
 
-            setTimeout(() => {
+            // Limpa qualquer timer anterior para evitar múltiplos timers
+            if (sparkTimer) {
+                clearTimeout(sparkTimer);
+            }
+
+            // Inicia o timer para os sparks APÓS a rotação + o atraso desejado
+            sparkTimer = setTimeout(() => {
                 if (mouseIsOverLogo && !isSparkAnimating) {
                     isSparkAnimating = true;
                     createLogoSparkPath(logoParticlesContainer, () => {
@@ -293,11 +300,16 @@
                         }
                     });
                 }
-            }, logoRotationDuration * 1000);
+            }, (logoRotationDuration * 1000) + 600); // Adiciona 600ms (0,6 segundo) ao tempo de rotação
         });
 
         logo.addEventListener('mouseleave', () => {
             mouseIsOverLogo = false;
+
+            // Limpa o timer dos sparks quando o mouse sai, se ele ainda estiver ativo
+            if (sparkTimer) {
+                clearTimeout(sparkTimer);
+            }
 
             if (isSparkAnimating) {
                 return;
@@ -308,6 +320,41 @@
     }
 
     // --- Efeito de seleção de livro na galeria (AGORA COM ASMR E EMPURRÃO VERTICAL E HORIZONTAL) ---
+    // Variável global para armazenar as linhas
+    let cachedRows = [];
+
+    function updateGalleryRows() {
+        const galleryItems = Array.from(document.querySelectorAll('.galeria a'));
+        if (galleryItems.length === 0) {
+            cachedRows = [];
+            return;
+        }
+
+        let tempRows = [];
+        let currentY = -1; 
+        // Aumentei a tolerância para detecção de linha e usando Math.floor
+        const tolerance = 15; // Pode ajustar isso se 15 ainda for pouco/muito
+
+        galleryItems.forEach(item => {
+            // Usando offsetTop que é relativo ao elemento offsetParent (neste caso, .galeria)
+            // É menos propenso a sub-pixel glitches do que getBoundingClientRect().top
+            const itemY = Math.floor(item.offsetTop); 
+
+            if (tempRows.length === 0 || Math.abs(itemY - currentY) > tolerance) {
+                currentY = itemY;
+                tempRows.push([]); 
+            }
+            tempRows[tempRows.length - 1].push(item); 
+        });
+        cachedRows = tempRows;
+
+        console.log("--- Rows Updated ---");
+        cachedRows.forEach((row, rowIndex) => {
+            console.log(`Row ${rowIndex}:`, row.map(item => item.querySelector('img').alt));
+        });
+        console.log("--------------------");
+    }
+
     function setupBookSelectionEffect() {
         const galleryItems = Array.from(document.querySelectorAll('.galeria a'));
         if (galleryItems.length === 0) return;
@@ -320,22 +367,10 @@
         ];
         asmrAudios.forEach(audio => audio.load());
 
-        // Melhorando o cálculo de itens por linha
-        // Vamos agrupar os itens por linha com base em suas posições y
-        let rows = [];
-        let currentRowY = -1; // Usar -1 para garantir que a primeira linha seja detectada
+        // Chame updateGalleryRows() inicialmente e sempre que a janela for redimensionada
+        updateGalleryRows(); 
+        window.addEventListener('resize', updateGalleryRows);
 
-        galleryItems.forEach(item => {
-            const itemRect = item.getBoundingClientRect();
-            // Se a posição Y do topo do item for significativamente diferente da linha atual, comece uma nova linha
-            if (Math.abs(itemRect.top - currentRowY) > 5) { // 5px de tolerância
-                currentRowY = itemRect.top;
-                rows.push([]); // Adiciona uma nova linha
-            }
-            rows[rows.length - 1].push(item); // Adiciona o item à última linha
-        });
-
-        // Agora, para cada item, podemos encontrar seu índice global e também sua linha e coluna
         galleryItems.forEach((item, index) => {
             item.addEventListener('mouseenter', function() {
                 this.classList.add('selected-book');
@@ -350,35 +385,49 @@
                     nextSibling.classList.add('pushed-aside-left');
                 }
 
-                // Empurrão Vertical (LÓGICA REVISADA)
-                // Encontrar a linha e coluna do item atual
+                // Empurrão Vertical (LÓGICA REVISADA COM cachedRows e mais logs)
                 let currentRowIndex = -1;
                 let currentColIndex = -1;
-                for (let r = 0; r < rows.length; r++) {
-                    const foundColIndex = rows[r].indexOf(item);
+
+                // Encontra o item atual no cachedRows
+                for (let r = 0; r < cachedRows.length; r++) {
+                    const foundColIndex = cachedRows[r].indexOf(this); // 'this' é o item atual
                     if (foundColIndex !== -1) {
                         currentRowIndex = r;
                         currentColIndex = foundColIndex;
                         break;
                     }
                 }
+                
+                console.log(`--- Hovered: ${this.querySelector('img').alt} (Row: ${currentRowIndex}, Col: ${currentColIndex}) ---`);
+
 
                 if (currentRowIndex !== -1) {
                     // Item na linha de cima (mesma coluna)
                     if (currentRowIndex > 0) {
-                        const itemAbove = rows[currentRowIndex - 1][currentColIndex];
+                        const itemAbove = cachedRows[currentRowIndex - 1][currentColIndex];
                         if (itemAbove) {
                             itemAbove.classList.add('pushed-down'); // Empurra o item de CIMA para BAIXO
+                            console.log(`  - Pushing DOWN: ${itemAbove.querySelector('img').alt}`);
+                        } else {
+                            console.warn(`  - WARNING: No item directly above in column ${currentColIndex} of row ${currentRowIndex - 1}. Row content:`, cachedRows[currentRowIndex - 1].map(i => i.querySelector('img').alt));
                         }
+                    } else {
+                        console.log(`  - No row above for ${this.querySelector('img').alt}`);
                     }
 
                     // Item na linha de baixo (mesma coluna)
-                    if (currentRowIndex < rows.length - 1) {
-                        const itemBelow = rows[currentRowIndex + 1][currentColIndex];
+                    if (currentRowIndex < cachedRows.length - 1) {
+                        const itemBelow = cachedRows[currentRowIndex + 1][currentColIndex];
                         if (itemBelow) {
                             itemBelow.classList.add('pushed-up'); // Empurra o item de BAIXO para CIMA
+                            console.log(`  - Pushing UP: ${itemBelow.querySelector('img').alt}`);
+                        } else {
+                            console.warn(`  - WARNING: No item directly below in column ${currentColIndex} of row ${currentRowIndex + 1}. Row content:`, cachedRows[currentRowIndex + 1].map(i => i.querySelector('img').alt));
                         }
                     }
+                } else {
+                    console.error(`  - ERROR: Item not found in cachedRows: ${this.querySelector('img').alt}. This should not happen.`);
                 }
 
                 // Efeito ASMR (mantido)
@@ -401,11 +450,11 @@
                     nextSibling.classList.remove('pushed-aside-left');
                 }
 
-                // Remove empurrão Vertical (LÓGICA REVISADA)
+                // Remove empurrão Vertical (LÓGICA REVISADA COM cachedRows)
                 let currentRowIndex = -1;
                 let currentColIndex = -1;
-                for (let r = 0; r < rows.length; r++) {
-                    const foundColIndex = rows[r].indexOf(item);
+                for (let r = 0; r < cachedRows.length; r++) {
+                    const foundColIndex = cachedRows[r].indexOf(this);
                     if (foundColIndex !== -1) {
                         currentRowIndex = r;
                         currentColIndex = foundColIndex;
@@ -416,15 +465,15 @@
                 if (currentRowIndex !== -1) {
                     // Item na linha de cima
                     if (currentRowIndex > 0) {
-                        const itemAbove = rows[currentRowIndex - 1][currentColIndex];
+                        const itemAbove = cachedRows[currentRowIndex - 1][currentColIndex];
                         if (itemAbove) {
                             itemAbove.classList.remove('pushed-down');
                         }
                     }
 
                     // Item na linha de baixo
-                    if (currentRowIndex < rows.length - 1) {
-                        const itemBelow = rows[currentRowIndex + 1][currentColIndex];
+                    if (currentRowIndex < cachedRows.length - 1) {
+                        const itemBelow = cachedRows[currentRowIndex + 1][currentColIndex];
                         if (itemBelow) {
                             itemBelow.classList.remove('pushed-up');
                         }
@@ -468,7 +517,7 @@
       const miniParticlesContainer = document.getElementById('miniParticles');
       const extraParticlesContainer = document.getElementById('extraParticles');
 
-      createParticles(particlesContainer, 'particle', 18, 15, 10, 0, 15);
+      createParticles(particlesContainer, 'particle', 19, 15, 10, 0, 15);
       createParticles(miniParticlesContainer, 'mini-particle', 60, 20, 15, 0, 20);
       createParticles(extraParticlesContainer, 'extra-particle', 45, 25, 20, 0, 25);
 
