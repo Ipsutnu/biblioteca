@@ -97,7 +97,7 @@
     const orbitSpeed = 0.03;
     const dampening = 0.95;
 
-    let allParticles = []; 
+    let allParticles = [];  
 
     function animateParticles() {
         allParticles.forEach(particle => {
@@ -201,33 +201,40 @@
         const segmentDuration = 0.3; 
         const pauseBetweenSegments = 0.05; 
 
+        // Start from opacity 0 at the center-ish position
         keyframes.push({
             transform: `translate(${logoCenterOffset.x}px, ${logoCenterOffset.y}px) rotate(${rotationOffsetRadians * (180 / Math.PI) + 88}deg)`,
             opacity: 0
         });
 
+        let lastTargetX, lastTargetY, lastFinalRotation; // To store the last position for fade-out
+
         for (let i = 0; i <= numVertices; i++) {
             let angle = (Math.PI * 2 / numVertices) * i + rotationOffsetRadians;
-            const targetX = Math.cos(angle) * radius;
-            const targetY = Math.sin(angle) * radius;
-            const finalRotation = angle * (180 / Math.PI) + 88;
+            lastTargetX = Math.cos(angle) * radius;
+            lastTargetY = Math.sin(angle) * radius;
+            lastFinalRotation = angle * (180 / Math.PI) + 88;
 
             keyframes.push({
-                transform: `translate(${targetX + logoCenterOffset.x}px, ${targetY + logoCenterOffset.y}px) rotate(${finalRotation}deg)`,
-                opacity: 1
+                transform: `translate(${lastTargetX + logoCenterOffset.x}px, ${lastTargetY + logoCenterOffset.y}px) rotate(${lastFinalRotation}deg)`,
+                opacity: 1 // Full opacity during the path
             });
             totalDuration += segmentDuration;
 
             if (i < numVertices) {
                 keyframes.push({
-                    transform: `translate(${targetX + logoCenterOffset.x}px, ${targetY + logoCenterOffset.y}px) rotate(${finalRotation}deg)`,
+                    transform: `translate(${lastTargetX + logoCenterOffset.x}px, ${lastTargetY + logoCenterOffset.y}px) rotate(${lastFinalRotation}deg)`,
                     opacity: 1
                 });
                 totalDuration += pauseBetweenSegments;
             }
         }
 
-        keyframes[keyframes.length -1].opacity = 0;
+        // Add the final keyframe to fade out the spark at its last position
+        keyframes.push({
+            transform: `translate(${lastTargetX + logoCenterOffset.x}px, ${lastTargetY + logoCenterOffset.y}px) rotate(${lastFinalRotation}deg)`,
+            opacity: 0 // Fade out from the end of the path
+        });
 
         const timingOptions = {
             duration: totalDuration * 1000, 
@@ -247,109 +254,265 @@
         return animation; 
     }
 
+    // --- Variáveis de Estado Globais para as Transformações Combinadas da Logo e Galeria ---
+    let currentScrollScale = 1; // Escala atual da logo (1 = tamanho original)
+    let currentLogoRotation = 0; // Rotação total acumulada para a logo (em graus)
+    let isHovering = false; // Flag global para o estado de hover sobre a logo
+    
+    // Variáveis para o movimento vertical da galeria e seu fator de movimento
+    let galleryTranslateY = 0;
+    const galleryMovementFactor = 180; // Quão mais a galeria se move para baixo (original: 150)
+
+    // Dimensões iniciais da logo para cálculo de escala/translação (deve corresponder ao CSS)
+    const initialLogoBaseSize = 170; // max-width/height: 120px no CSS (ajuste isso no CSS e aqui)
+    const maxLogoScale = 4; // Escala máxima que a logo pode atingir
+    const scaleSpeedFactor = 0.005; // Velocidade com que a logo escala ao scrollar (mais lento)
+
+    // Variáveis para o movimento vertical da logo
+    let logoTranslateY = 0; // A quantidade de pixels que a logo deve se mover para baixo
+    const logoMoveThresholdRatio = 1;  
+    let maxLogoTranslateYValue = 0; 
+
+    // Variáveis para a rotação da logo ao scroll
+    let scrollRotationSpeed = 0; // Velocidade de rotação atual (graus por frame)
+    const scrollRotationFactor = 0.06; // Quão rápido a logo gira com o scroll (quando a rotação é ativa)
+    const scrollRotationDampening = 0.97; // Fator de desaceleração da rotação (era 0.99)
+    let scrollTimeout;  
+    let animationFrameId; 
+
+    // Variável para evitar conflito com a rotação de 180° no hover
+    let isHoverRotationActive = false;
+
+    // Função que aplica a translação vertical ao logo-container e a escala/rotação à logo
+    function applyLogoTransform() {
+        const logoContainer = document.querySelector('.logo-container');
+        const logo = document.querySelector('.logo');
+        if (!logoContainer || !logo) return;
+
+        let currentLogoTranslateY = 0;
+        if (currentScrollScale > 1) {
+            const scaleProgress = (currentScrollScale - 1) / (maxLogoScale - 1);
+            currentLogoTranslateY = scaleProgress * maxLogoTranslateYValue * logoMoveThresholdRatio;
+            currentLogoTranslateY = Math.min(currentLogoTranslateY, maxLogoTranslateYValue);
+        }
+        logoTranslateY = currentLogoTranslateY;
+
+        logoContainer.style.transform = `translateY(${logoTranslateY}px)`;
+        // Ensure rotation applies from the current angle
+        logo.style.transform = `scale(${currentScrollScale}) rotate(${currentLogoRotation}deg)`;
+    }
+
+    // Função para animar a rotação contínua da logo quando o scroll para
+    function animateLogoRotation() {
+        if (Math.abs(scrollRotationSpeed) > 0.005) { // Continua animando se a velocidade for detectável (limiar menor)
+            currentLogoRotation += scrollRotationSpeed;
+            scrollRotationSpeed *= scrollRotationDampening; // Reduz a velocidade de rotação gradualmente
+            applyLogoTransform(); 
+            animationFrameId = requestAnimationFrame(animateLogoRotation);
+        } else {
+            scrollRotationSpeed = 0; 
+            cancelAnimationFrame(animationFrameId);
+            // Only snap to 0 if rotation is negligible and not being controlled by hover
+            if (Math.abs(currentLogoRotation % 360) < 0.1 && !isHoverRotationActive) {
+                currentLogoRotation = 0;
+                applyLogoTransform(); // Ensure it snaps to 0 if it was almost there
+            }
+        }
+    }
+
+    // Função para ajustar a posição vertical da galeria
+    function applyGalleryTransform() {
+        const gallery = document.querySelector('.galeria');
+        if (!gallery) return;
+        galleryTranslateY = (currentScrollScale - 1) * galleryMovementFactor;
+        gallery.style.transform = `translateY(${galleryTranslateY}px)`;
+    }
+
     function setupLogoEffect() {
         const logo = document.querySelector('.logo');
+        const logoContainer = document.querySelector('.logo-container');
         const logoParticlesContainer = document.getElementById('logoParticles');
-        const logoRotationDuration = 2.6; 
-        let isSparkAnimating = false; 
-        let mouseIsOverLogo = false; 
-        let sparkTimer; // Variável para armazenar o ID do timer
+        const logoHoverRotationDegrees = 180;  
+        const logoRotationDuration = 1.9; 
+        let isSparkAnimating = false;
+        let sparkTimer;
 
-        if (!logo || !logoParticlesContainer) return;
+        if (!logo || !logoContainer || !logoParticlesContainer) return;
+
+        maxLogoTranslateYValue = (window.innerHeight / 2) - (initialLogoBaseSize / 2);
 
         logo.addEventListener('mouseenter', () => {
-            mouseIsOverLogo = true;
-
-            if (isSparkAnimating) {
-                return;
+            isHovering = true;
+            if (currentScrollScale < 1.05) { 
+                isHoverRotationActive = true;
+                // Set transition BEFORE updating currentLogoRotation to ensure smooth animation
+                logo.style.transition = `transform ${logoRotationDuration}s ease-out`;
+                currentLogoRotation += logoHoverRotationDegrees; 
+                applyLogoTransform();
+                // After the main hover rotation transition, set a faster transition for subsequent changes
+                setTimeout(() => {
+                    if (isHovering && currentScrollScale < 1.05) { 
+                        logo.style.transition = `transform 0.4s ease-out`;
+                    }
+                }, logoRotationDuration * 1000); 
             }
 
-            logo.style.transform = 'rotate(180deg) scale(1.5)';
-
-            // Limpa qualquer timer anterior para evitar múltiplos timers
-            if (sparkTimer) {
-                clearTimeout(sparkTimer);
-            }
-
-            // Inicia o timer para os sparks APÓS a rotação + o atraso desejado (1 segundo)
-            sparkTimer = setTimeout(() => {
-                if (mouseIsOverLogo && !isSparkAnimating) {
-                    isSparkAnimating = true;
-                    createLogoSparkPath(logoParticlesContainer, () => {
-                        isSparkAnimating = false; 
-                        if (!mouseIsOverLogo) {
-                            logo.style.transform = ''; 
-                        }
-                    });
+            if (currentScrollScale < 1.05 && !isSparkAnimating) {
+                if (sparkTimer) clearTimeout(sparkTimer); 
+                sparkTimer = setTimeout(() => {
+                    if (isHovering && currentScrollScale < 1.05) { 
+                        isSparkAnimating = true;
+                        createLogoSparkPath(logoParticlesContainer, () => {
+                            isSparkAnimating = false;
+                        });
+                    }
+                }, (logoRotationDuration * 1000) + 700); 
+            } else if (currentScrollScale >= 1.05) {
+                if (sparkTimer) clearTimeout(sparkTimer);
+                if (isSparkAnimating) {
+                    logoParticlesContainer.innerHTML = '';
+                    isSparkAnimating = false;
                 }
-            }, (logoRotationDuration * 1000) + 700); // Adiciona 700ms ao tempo de rotação
+            }
         });
 
         logo.addEventListener('mouseleave', () => {
-            mouseIsOverLogo = false;
+            isHovering = false;
+            
+            // Set transition BEFORE updating the rotation to ensure smooth return
+            logo.style.transition = `transform ${logoRotationDuration}s ease-out`; 
 
-            // Limpa o timer dos sparks quando o mouse sai, se ele ainda estiver ativo
+            // If hover rotation was active, reverse it.
+            // Then, reset to a clean multiple of 360 degrees or exactly 0.
+            if (isHoverRotationActive) {
+                isHoverRotationActive = false;
+                currentLogoRotation -= logoHoverRotationDegrees; // Reverse the last 180 deg rotation
+            }
+            
+            // Normalize currentLogoRotation to be a multiple of 360 to smoothly return to an "original facing" position
+            // This ensures it spins back to the nearest 0, 360, 720, etc.
+            currentLogoRotation = Math.round(currentLogoRotation / 360) * 0;
+
+            // Reset scale and translation values to their initial states
+            currentScrollScale = 1;
+            logoTranslateY = 0;
+            galleryTranslateY = 0;
+
+            // Apply all transformations for a smooth return
+            logoContainer.style.transition = `transform 1.8s ease-out`; 
+            const gallery = document.querySelector('.galeria');
+            if (gallery) {
+                gallery.style.transition = `transform 1.4s ease-out`; 
+            }
+
+            applyLogoTransform(); 
+            applyGalleryTransform();
+
+            // Clear spark related timers/animations
             if (sparkTimer) {
-                clearTimeout(sparkTimer);
+                clearTimeout(sparkTimer); 
+            }
+            if (isSparkAnimating) { 
+                logoParticlesContainer.innerHTML = '';
+                isSparkAnimating = false;
+            }
+        });
+
+        // --- Handle mouse wheel scroll over the logo ---
+        logo.addEventListener('wheel', (event) => {
+            event.preventDefault(); 
+
+            // Set short transitions for responsiveness during scroll
+            logo.style.transition = `transform 2s ease-out`; 
+            logoContainer.style.transition = `transform 2s ease-out`;
+            
+            const gallery = document.querySelector('.galeria');
+            if (gallery) {
+                gallery.style.transition = `transform 2s ease-out`; 
             }
 
-            if (isSparkAnimating) {
-                return;
+            const scrollAmount = -event.deltaY; // Negative for scroll up, Positive for scroll down
+
+            // 1. Logic to INCREASE/DECREASE logo scale and move gallery
+            currentScrollScale += scaleSpeedFactor * -scrollAmount; 
+            currentScrollScale = Math.max(1, Math.min(maxLogoScale, currentScrollScale)); 
+
+            // 2. Logic for ROTATION on scroll
+            const currentLogoYProgress = (logoTranslateY / maxLogoTranslateYValue);
+
+            let dynamicRotationFactor = 0;
+            if (currentLogoYProgress >= 0.25) { 
+                const rotationProgress = Math.min(1, (currentLogoYProgress - 0.25) / 0.75); 
+                dynamicRotationFactor = scrollRotationFactor * rotationProgress;
             }
 
-            logo.style.transform = ''; 
+            if (dynamicRotationFactor > 0 || Math.abs(scrollRotationSpeed) > 0.005) {
+                currentLogoRotation += (scrollAmount * dynamicRotationFactor);  // Add to current rotation
+                scrollRotationSpeed = (scrollAmount * dynamicRotationFactor); 
+            } else {
+                if (Math.abs(scrollRotationSpeed) > 0.005) { 
+                    scrollRotationSpeed *= scrollRotationDampening; 
+                } else {
+                    scrollRotationSpeed = 0; 
+                }
+
+                // If not actively scrolling or hovering, gently bring rotation towards the nearest multiple of 360
+                // This helps avoid tiny residual rotations but doesn't instantly snap.
+                if (Math.abs(currentLogoRotation % 360) > 0.1 && !isHoverRotationActive) { 
+                     currentLogoRotation *= 0.99; 
+                } else if (!isHoverRotationActive) {
+                    currentLogoRotation = Math.round(currentLogoRotation / 360) * 360; // Snap to nearest 360 multiple
+                }
+            }
+
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                if (Math.abs(scrollRotationSpeed) > 0.005) { 
+                    cancelAnimationFrame(animationFrameId); 
+                    animateLogoRotation();
+                } else {
+                    scrollRotationSpeed = 0; 
+                    cancelAnimationFrame(animationFrameId); 
+                }
+            }, 100); 
+
+            applyLogoTransform();
+            applyGalleryTransform();
+
+            if (currentScrollScale > 1.1) { 
+                if (sparkTimer) clearTimeout(sparkTimer);
+                if (isSparkAnimating) {
+                    logoParticlesContainer.innerHTML = '';
+                    isSparkAnimating = false;
+                }
+            } else if (currentScrollScale < 1.1 && isHovering && !isSparkAnimating) { 
+                if (sparkTimer) clearTimeout(sparkTimer);
+                sparkTimer = setTimeout(() => {
+                    if (isHovering && currentScrollScale < 1.1) {
+                        isSparkAnimating = true;
+                        createLogoSparkPath(logoParticlesContainer, () => {
+                            isSparkAnimating = false;
+                        });
+                    }
+                }, (logoRotationDuration * 1000) + 700);
+            }
         });
     }
 
     // --- Efeito de seleção de livro na galeria (AGORA COM ASMR E EMPURRÃO VERTICAL E HORIZONTAL) ---
-    // Variável global para armazenar as linhas
-    let cachedRows = [];
-
-    function updateGalleryRows() {
-        const galleryItems = Array.from(document.querySelectorAll('.galeria a'));
-        if (galleryItems.length === 0) {
-            cachedRows = [];
-            return;
-        }
-
-        let tempRows = [];
-        let currentY = -1; 
-        const tolerance = 15; // Pode ajustar isso se 15 ainda for pouco/muito
-
-        galleryItems.forEach(item => {
-            const itemY = Math.floor(item.offsetTop); 
-
-            if (tempRows.length === 0 || Math.abs(itemY - currentY) > tolerance) {
-                currentY = itemY;
-                tempRows.push([]); 
-            }
-            tempRows[tempRows.length - 1].push(item); 
-        });
-        cachedRows = tempRows;
-
-        console.log("--- Rows Updated ---");
-        cachedRows.forEach((row, rowIndex) => {
-            console.log(`Row ${rowIndex}:`, row.map(item => item.querySelector('img').alt));
-        });
-        console.log("--------------------");
-    }
+    let lastPlayedAudio = null;
+    const asmrAudios = [
+        new Audio('audios/page-turn-1.mp3'),
+        new Audio('audios/page-turn-2.mp3'),
+        new Audio('audios/page-turn-3.mp3'),
+        new Audio('audios/page-turn-4.mp3')
+    ];
+    asmrAudios.forEach(audio => audio.load());
 
     function setupBookSelectionEffect() {
-        const galleryItems = Array.from(document.querySelectorAll('.galeria a'));
-        if (galleryItems.length === 0) return;
+        const galleryItems = document.querySelectorAll('.galeria a');
 
-        const asmrAudios = [
-            new Audio('audios/page-turn-1.mp3'),
-            new Audio('audios/page-turn-2.mp3'),
-            new Audio('audios/page-turn-3.mp3'),
-            new Audio('audios/page-turn-4.mp3')
-        ];
-        asmrAudios.forEach(audio => audio.load());
-
-        updateGalleryRows(); 
-        window.addEventListener('resize', updateGalleryRows);
-
-        galleryItems.forEach((item, index) => {
+        galleryItems.forEach(item => {
             item.addEventListener('mouseenter', function() {
                 this.classList.add('selected-book');
                 
@@ -362,51 +525,34 @@
                     nextSibling.classList.add('pushed-aside-left');
                 }
 
-                let currentRowIndex = -1;
-                let currentColIndex = -1;
-
-                for (let r = 0; r < cachedRows.length; r++) {
-                    const foundColIndex = cachedRows[r].indexOf(this);
-                    if (foundColIndex !== -1) {
-                        currentRowIndex = r;
-                        currentColIndex = foundColIndex;
-                        break;
-                    }
-                }
+                const itemRect = this.getBoundingClientRect();
                 
-                console.log(`--- Hovered: ${this.querySelector('img').alt} (Row: ${currentRowIndex}, Col: ${currentColIndex}) ---`);
+                galleryItems.forEach(otherItem => {
+                    if (otherItem === this) return;
 
+                    const otherItemRect = otherItem.getBoundingClientRect();
 
-                if (currentRowIndex !== -1) {
-                    if (currentRowIndex > 0) {
-                        const itemAbove = cachedRows[currentRowIndex - 1][currentColIndex];
-                        if (itemAbove) {
-                            itemAbove.classList.add('pushed-down');
-                            console.log(`  - Pushing DOWN: ${itemAbove.querySelector('img').alt}`);
-                        } else {
-                            console.warn(`  - WARNING: No item directly above in column ${currentColIndex} of row ${currentRowIndex - 1}. Row content:`, cachedRows[currentRowIndex - 1].map(i => i.querySelector('img').alt));
-                        }
-                    } else {
-                        console.log(`  - No row above for ${this.querySelector('img').alt}`);
+                    if (otherItemRect.bottom < itemRect.top && 
+                        otherItemRect.left < itemRect.right && 
+                        otherItemRect.right > itemRect.left) {
+                        otherItem.classList.add('pushed-down');
+                    } 
+                    else if (otherItemRect.top > itemRect.bottom && 
+                             otherItemRect.left < itemRect.right && 
+                             otherItemRect.right > itemRect.left) {
+                        otherItem.classList.add('pushed-up');
                     }
+                });
 
-                    if (currentRowIndex < cachedRows.length - 1) {
-                        const itemBelow = cachedRows[currentRowIndex + 1][currentColIndex];
-                        if (itemBelow) {
-                            itemBelow.classList.add('pushed-up');
-                            console.log(`  - Pushing UP: ${itemBelow.querySelector('img').alt}`);
-                        } else {
-                            console.warn(`  - WARNING: No item directly below in column ${currentColIndex} of row ${currentRowIndex + 1}. Row content:`, cachedRows[currentRowIndex + 1].map(i => i.querySelector('img').alt));
-                        }
-                    }
-                } else {
-                    console.error(`  - ERROR: Item not found in cachedRows: ${this.querySelector('img').alt}. This should not happen.`);
+                if (lastPlayedAudio) {
+                    lastPlayedAudio.pause();
+                    lastPlayedAudio.currentTime = 0;
                 }
-
                 const randomIndex = Math.floor(Math.random() * asmrAudios.length);
                 const audio = asmrAudios[randomIndex].cloneNode();
                 audio.volume = 0.4;
                 audio.play().catch(e => console.error("Erro ao tocar áudio ASMR:", e));
+                lastPlayedAudio = audio;
             });
 
             item.addEventListener('mouseleave', function() {
@@ -421,31 +567,20 @@
                     nextSibling.classList.remove('pushed-aside-left');
                 }
 
-                let currentRowIndex = -1;
-                let currentColIndex = -1;
-                for (let r = 0; r < cachedRows.length; r++) {
-                    const foundColIndex = cachedRows[r].indexOf(this);
-                    if (foundColIndex !== -1) {
-                        currentRowIndex = r;
-                        currentColIndex = foundColIndex;
-                        break;
-                    }
+                galleryItems.forEach(otherItem => {
+                    otherItem.classList.remove('pushed-down', 'pushed-up');
+                });
+
+                if (lastPlayedAudio) {
+                    lastPlayedAudio.pause();
+                    lastPlayedAudio.currentTime = 0;
                 }
+            });
 
-                if (currentRowIndex !== -1) {
-                    if (currentRowIndex > 0) {
-                        const itemAbove = cachedRows[currentRowIndex - 1][currentColIndex];
-                        if (itemAbove) {
-                            itemAbove.classList.remove('pushed-down');
-                        }
-                    }
-
-                    if (currentRowIndex < cachedRows.length - 1) {
-                        const itemBelow = cachedRows[currentRowIndex + 1][currentColIndex];
-                        if (itemBelow) {
-                            itemBelow.classList.remove('pushed-up');
-                        }
-                    }
+            item.addEventListener('click', () => {
+                if (lastPlayedAudio) {
+                    lastPlayedAudio.pause();
+                    lastPlayedAudio.currentTime = 0;
                 }
             });
         });
@@ -455,22 +590,22 @@
     function setupCustomCursor() {
       const cursor = document.getElementById('cursor');
       if (!cursor) return;
-      let cursorX = 0, cursorY = 0; 
+      let cursorX = 0, cursorY = 0;  
       const cursorSizeOffset = cursor.offsetWidth / 2; 
 
-      document.addEventListener('mousemove', (e) => { 
-        mouseX = e.clientX; 
-        mouseY = e.clientY; 
+      document.addEventListener('mousemove', (e) => {  
+        mouseX = e.clientX;  
+        mouseY = e.clientY;  
       });
 
       function animateCursor() {
-        cursorX += (mouseX - cursorX) * 0.12; 
-        cursorY += (mouseY - cursorY) * 0.12; 
+        cursorX += (mouseX - cursorX) * 0.12;  
+        cursorY += (mouseY - cursorY) * 0.12;  
         cursor.style.left = cursorX - cursorSizeOffset + 'px';
         cursor.style.top = cursorY - cursorSizeOffset + 'px';
-        requestAnimationFrame(animateCursor); 
+        requestAnimationFrame(animateCursor);  
       }
-      animateCursor(); 
+      animateCursor();  
 
       const interactiveElements = document.querySelectorAll('a, img.logo');
       interactiveElements.forEach(el => {
@@ -483,22 +618,19 @@
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]]; // Troca elementos
+            [array[i], array[j]] = [array[j], array[i]];
         }
     }
 
     // --- Inicialização de todos os efeitos quando o DOM estiver carregado ---
     document.addEventListener('DOMContentLoaded', () => {
-      // 1. Embaralhar os livros primeiro
       const gallery = document.querySelector('.galeria');
-      const galleryItems = Array.from(gallery.children); // Pega todos os filhos (os <a>)
+      const galleryItems = Array.from(gallery.children);
       
-      shuffleArray(galleryItems); // Embaralha o array de elementos
+      shuffleArray(galleryItems);
 
-      // Remove os elementos existentes e os adiciona de volta na nova ordem
       galleryItems.forEach(item => gallery.appendChild(item));
 
-      // 2. O restante da sua inicialização de efeitos
       const particlesContainer = document.getElementById('particles');
       const miniParticlesContainer = document.getElementById('miniParticles');
       const extraParticlesContainer = document.getElementById('extraParticles');
@@ -511,9 +643,7 @@
 
       setupCustomCursor();
       setupLogoEffect();
-      // setupBookSelectionEffect DEVE ser chamado DEPOIS de randomizar,
-      // pois ele depende da ordem final dos elementos.
-      setupBookSelectionEffect(); 
+      setupBookSelectionEffect();
     });
   </script>
 </body>
