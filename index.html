@@ -45,7 +45,6 @@
     <a href="livros/livro18.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro18.png" alt="Livro 18"></a>
     <a href="livros/livro19.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro19.png" alt="Livro 19"></a>
     <a href="livros/livro20.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro20.png" alt="Livro 20"></a>
-	
   </section>
 
   <footer>
@@ -53,7 +52,7 @@
   </footer>
 
   <script>
-    // --- Funções para criar partículas de fundo (agora 100% controladas por JS) ---
+    // --- Funções para criar partículas de fundo ---
     function createParticles(container, className, count, minDuration, maxDuration, minDelay, maxDelay) {
       if (!container) return;
       container.innerHTML = ''; // Limpa o contêiner
@@ -62,25 +61,22 @@
         const particle = document.createElement('div');
         particle.className = className;
         
-        // Initial random position (JS will move them up)
         particle.x = Math.random() * window.innerWidth;
-        particle.y = window.innerHeight + Math.random() * 100; // Start slightly below screen
+        particle.y = window.innerHeight + Math.random() * 100;
 
-        particle.vx = 0; // Current velocity X
-        particle.vy = 0; // Current velocity Y
+        particle.vx = 0;
+        particle.vy = 0;
 
-        // Properties for floating when not attracted
-        particle.floatSpeedY = (0.5 + Math.random() * 1.5) * -1; // Negative to move up
-        particle.floatSpeedX = (Math.random() - 0.5) * 0.5; // Slight horizontal drift
-        particle.rotation = Math.random() * 360; // Initial rotation
-        particle.rotationSpeed = (Math.random() - 0.5) * 0.2; // Speed of rotation
+        particle.floatSpeedY = (0.5 + Math.random() * 1.5) * -1;
+        particle.floatSpeedX = (Math.random() - 0.5) * 0.5;
+        particle.rotation = Math.random() * 360;
+        particle.rotationSpeed = (Math.random() - 0.5) * 0.2;
 
-        particle.angle = Math.random() * Math.PI * 2; // For orbiting
+        particle.angle = Math.random() * Math.PI * 2;
         particle.orbitRadius = 0;
         particle.isOrbiting = false;
         particle.isAttracted = false;
 
-        // Set initial position directly
         particle.style.left = particle.x + 'px';
         particle.style.top = particle.y + 'px';
         
@@ -95,11 +91,11 @@
     // --- Variáveis e Função para o efeito de atração e órbita das partículas (buraco negro) ---
     let mouseX = 0;
     let mouseY = 0;
-    const attractionRadius = 150; // Raio de influência do mouse em pixels para atração inicial
-    const orbitRadiusRange = { min: 30, max: 90 }; // Faixa de raio para a órbita final
-    const attractionStrength = 0.001; // Força da atração (valor menor para suavidade)
-    const orbitSpeed = 0.03; // Velocidade angular da órbita
-    const dampening = 0.95; // Reduz a velocidade para evitar movimento infinito
+    const attractionRadius = 150;
+    const orbitRadiusRange = { min: 30, max: 90 };
+    const attractionStrength = 0.001;
+    const orbitSpeed = 0.03;
+    const dampening = 0.95;
 
     let allParticles = []; 
 
@@ -110,25 +106,21 @@
             const distance = Math.sqrt(dx * dx + dy * dy);
 
             if (distance < attractionRadius) {
-                // Particle is within attraction radius
                 if (!particle.isAttracted) {
                     particle.isAttracted = true;
                 }
 
                 if (distance < orbitRadiusRange.max) {
-                    // Start or continue orbiting
                     if (!particle.isOrbiting) {
                         particle.isOrbiting = true;
                         particle.orbitRadius = orbitRadiusRange.min + Math.random() * (orbitRadiusRange.max - orbitRadiusRange.min);
-                        particle.angle = Math.atan2(dy, dx); // Initialize angle relative to mouse for smooth entry
+                        particle.angle = Math.atan2(dy, dx);
                     }
 
-                    // Calculate target orbit position
                     particle.angle += orbitSpeed; 
                     const targetX = mouseX + Math.cos(particle.angle) * particle.orbitRadius;
                     const targetY = mouseY + Math.sin(particle.angle) * particle.orbitRadius;
 
-                    // Attract towards the orbit target
                     const forceToOrbitX = (targetX - particle.x) * attractionStrength * 5; 
                     const forceToOrbitY = (targetY - particle.y) * attractionStrength * 5;
 
@@ -136,47 +128,38 @@
                     particle.vy += forceToOrbitY;
 
                 } else {
-                    // Only attraction, not yet in orbit range
                     if (particle.isOrbiting) { 
                         particle.isOrbiting = false;
                         particle.orbitRadius = 0;
                     }
                     
-                    // Apply attraction force, proportional to distance
                     const forceFactor = (attractionRadius - distance) / attractionRadius; 
                     particle.vx += dx * attractionStrength * forceFactor;
                     particle.vy += dy * attractionStrength * forceFactor;
                 }
 
-                // Apply dampening to velocities
                 particle.vx *= dampening;
                 particle.vy *= dampening;
 
             } else {
-                // Particle is outside attraction radius, return to floating state
                 if (particle.isAttracted) { 
                     particle.isAttracted = false;
                     particle.isOrbiting = false;
                     particle.orbitRadius = 0;
                 }
 
-                // Apply dampening even when floating, so it's not infinite
                 particle.vx *= dampening; 
                 particle.vy *= dampening; 
 
-                // Gently guide velocity towards the desired float speed
                 const floatAdjustSpeed = 0.05; 
                 particle.vx += (particle.floatSpeedX - particle.vx) * floatAdjustSpeed;
                 particle.vy += (particle.floatSpeedY - particle.vy) * floatAdjustSpeed;
 
-                // Apply rotation only when not attracted
                 particle.rotation += particle.rotationSpeed;
 
-                // Reset particle if it goes off screen (top)
                 if (particle.y < -50) { 
                     particle.y = window.innerHeight + 50;
                     particle.x = Math.random() * window.innerWidth;
-                    // Reset attraction velocities but not float speeds on respawn
                     particle.vx = 0; 
                     particle.vy = 0; 
                     particle.floatSpeedY = (0.5 + Math.random() * 1.5) * -1;
@@ -186,7 +169,6 @@
                 }
             }
 
-            // Update particle's position in the DOM
             particle.x += particle.vx;
             particle.y += particle.vy;
 
@@ -198,7 +180,7 @@
         requestAnimationFrame(animateParticles); 
     }
 
-    // --- Lógica para a animação do brilho da logo (mantida) ---
+    // --- Lógica para a animação do brilho da logo ---
     function createLogoSparkPath(particlesContainer, onSparkFinishCallback) {
         if (!particlesContainer) return;
 
@@ -289,7 +271,7 @@
                 clearTimeout(sparkTimer);
             }
 
-            // Inicia o timer para os sparks APÓS a rotação + o atraso desejado
+            // Inicia o timer para os sparks APÓS a rotação + o atraso desejado (1 segundo)
             sparkTimer = setTimeout(() => {
                 if (mouseIsOverLogo && !isSparkAnimating) {
                     isSparkAnimating = true;
@@ -300,7 +282,7 @@
                         }
                     });
                 }
-            }, (logoRotationDuration * 1000) + 600); // Adiciona 600ms (0,6 segundo) ao tempo de rotação
+            }, (logoRotationDuration * 1000) + 700); // Adiciona 700ms ao tempo de rotação
         });
 
         logo.addEventListener('mouseleave', () => {
@@ -332,12 +314,9 @@
 
         let tempRows = [];
         let currentY = -1; 
-        // Aumentei a tolerância para detecção de linha e usando Math.floor
         const tolerance = 15; // Pode ajustar isso se 15 ainda for pouco/muito
 
         galleryItems.forEach(item => {
-            // Usando offsetTop que é relativo ao elemento offsetParent (neste caso, .galeria)
-            // É menos propenso a sub-pixel glitches do que getBoundingClientRect().top
             const itemY = Math.floor(item.offsetTop); 
 
             if (tempRows.length === 0 || Math.abs(itemY - currentY) > tolerance) {
@@ -367,7 +346,6 @@
         ];
         asmrAudios.forEach(audio => audio.load());
 
-        // Chame updateGalleryRows() inicialmente e sempre que a janela for redimensionada
         updateGalleryRows(); 
         window.addEventListener('resize', updateGalleryRows);
 
@@ -375,7 +353,6 @@
             item.addEventListener('mouseenter', function() {
                 this.classList.add('selected-book');
                 
-                // Empurrão Horizontal (mantido como está, pois funciona bem)
                 const prevSibling = this.previousElementSibling;
                 if (prevSibling && prevSibling.matches && prevSibling.matches('.galeria a')) {
                     prevSibling.classList.add('pushed-aside-right');
@@ -385,13 +362,11 @@
                     nextSibling.classList.add('pushed-aside-left');
                 }
 
-                // Empurrão Vertical (LÓGICA REVISADA COM cachedRows e mais logs)
                 let currentRowIndex = -1;
                 let currentColIndex = -1;
 
-                // Encontra o item atual no cachedRows
                 for (let r = 0; r < cachedRows.length; r++) {
-                    const foundColIndex = cachedRows[r].indexOf(this); // 'this' é o item atual
+                    const foundColIndex = cachedRows[r].indexOf(this);
                     if (foundColIndex !== -1) {
                         currentRowIndex = r;
                         currentColIndex = foundColIndex;
@@ -403,11 +378,10 @@
 
 
                 if (currentRowIndex !== -1) {
-                    // Item na linha de cima (mesma coluna)
                     if (currentRowIndex > 0) {
                         const itemAbove = cachedRows[currentRowIndex - 1][currentColIndex];
                         if (itemAbove) {
-                            itemAbove.classList.add('pushed-down'); // Empurra o item de CIMA para BAIXO
+                            itemAbove.classList.add('pushed-down');
                             console.log(`  - Pushing DOWN: ${itemAbove.querySelector('img').alt}`);
                         } else {
                             console.warn(`  - WARNING: No item directly above in column ${currentColIndex} of row ${currentRowIndex - 1}. Row content:`, cachedRows[currentRowIndex - 1].map(i => i.querySelector('img').alt));
@@ -416,11 +390,10 @@
                         console.log(`  - No row above for ${this.querySelector('img').alt}`);
                     }
 
-                    // Item na linha de baixo (mesma coluna)
                     if (currentRowIndex < cachedRows.length - 1) {
                         const itemBelow = cachedRows[currentRowIndex + 1][currentColIndex];
                         if (itemBelow) {
-                            itemBelow.classList.add('pushed-up'); // Empurra o item de BAIXO para CIMA
+                            itemBelow.classList.add('pushed-up');
                             console.log(`  - Pushing UP: ${itemBelow.querySelector('img').alt}`);
                         } else {
                             console.warn(`  - WARNING: No item directly below in column ${currentColIndex} of row ${currentRowIndex + 1}. Row content:`, cachedRows[currentRowIndex + 1].map(i => i.querySelector('img').alt));
@@ -430,7 +403,6 @@
                     console.error(`  - ERROR: Item not found in cachedRows: ${this.querySelector('img').alt}. This should not happen.`);
                 }
 
-                // Efeito ASMR (mantido)
                 const randomIndex = Math.floor(Math.random() * asmrAudios.length);
                 const audio = asmrAudios[randomIndex].cloneNode();
                 audio.volume = 0.4;
@@ -440,7 +412,6 @@
             item.addEventListener('mouseleave', function() {
                 this.classList.remove('selected-book');
                 
-                // Remove empurrão Horizontal (mantido)
                 const prevSibling = this.previousElementSibling;
                 if (prevSibling && prevSibling.matches && prevSibling.matches('.galeria a')) {
                     prevSibling.classList.remove('pushed-aside-right');
@@ -450,7 +421,6 @@
                     nextSibling.classList.remove('pushed-aside-left');
                 }
 
-                // Remove empurrão Vertical (LÓGICA REVISADA COM cachedRows)
                 let currentRowIndex = -1;
                 let currentColIndex = -1;
                 for (let r = 0; r < cachedRows.length; r++) {
@@ -463,7 +433,6 @@
                 }
 
                 if (currentRowIndex !== -1) {
-                    // Item na linha de cima
                     if (currentRowIndex > 0) {
                         const itemAbove = cachedRows[currentRowIndex - 1][currentColIndex];
                         if (itemAbove) {
@@ -471,7 +440,6 @@
                         }
                     }
 
-                    // Item na linha de baixo
                     if (currentRowIndex < cachedRows.length - 1) {
                         const itemBelow = cachedRows[currentRowIndex + 1][currentColIndex];
                         if (itemBelow) {
@@ -483,7 +451,7 @@
         });
     }
 
-    // --- Cursor personalizado (mantido) ---
+    // --- Cursor personalizado ---
     function setupCustomCursor() {
       const cursor = document.getElementById('cursor');
       if (!cursor) return;
@@ -511,8 +479,26 @@
       });
     }
 
+    // --- Função para embaralhar um array (Fisher-Yates) ---
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]]; // Troca elementos
+        }
+    }
+
     // --- Inicialização de todos os efeitos quando o DOM estiver carregado ---
     document.addEventListener('DOMContentLoaded', () => {
+      // 1. Embaralhar os livros primeiro
+      const gallery = document.querySelector('.galeria');
+      const galleryItems = Array.from(gallery.children); // Pega todos os filhos (os <a>)
+      
+      shuffleArray(galleryItems); // Embaralha o array de elementos
+
+      // Remove os elementos existentes e os adiciona de volta na nova ordem
+      galleryItems.forEach(item => gallery.appendChild(item));
+
+      // 2. O restante da sua inicialização de efeitos
       const particlesContainer = document.getElementById('particles');
       const miniParticlesContainer = document.getElementById('miniParticles');
       const extraParticlesContainer = document.getElementById('extraParticles');
@@ -525,7 +511,9 @@
 
       setupCustomCursor();
       setupLogoEffect();
-      setupBookSelectionEffect(); // Chamar aqui após o DOM estar pronto
+      // setupBookSelectionEffect DEVE ser chamado DEPOIS de randomizar,
+      // pois ele depende da ordem final dos elementos.
+      setupBookSelectionEffect(); 
     });
   </script>
 </body>
