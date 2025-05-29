@@ -99,12 +99,12 @@ header {
   position: relative; z-index: 1;
 }
 header img.logo {
-  max-width: 120px; margin-bottom: 0rem;
+  max-width: 170px; margin-bottom: 0rem;
   filter: drop-shadow(0 0 8px #cfa945aa);
-  transition: transform 2.6s ease;
+  transition: transform 0.4s ease-out; /* Adjusted for smoother scroll effect */
   position: relative; cursor: pointer;
 }
-header img.logo:hover { transform: rotate(180deg) scale(1.5); }
+/* Removed header img.logo:hover transform, now handled by JS */
 
 .logo-particles {
   position: absolute; top: 50%; left: 50%;
@@ -155,7 +155,7 @@ header img.logo:hover { transform: rotate(180deg) scale(1.5); }
 .galeria a {
   display: block; border-radius: 16px; overflow: visible;
   /* Ajuste para transições mais suaves - Aumentei o tempo */
-  transition: transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1), /* Suavização para o zoom e translateY do próprio item */
+  transition: transform 2.4s cubic-bezier(0.25, 0.1, 0.25, 1), /* Suavização para o zoom e translateY do próprio item */
               margin 0.4s cubic-bezier(0.25, 0.1, 0.25, 1),   /* Para os empurrões laterais */
               box-shadow 0.5s ease-in-out;
   position: relative;
