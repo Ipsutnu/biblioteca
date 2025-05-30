@@ -21,6 +21,11 @@
     <div class="logo-container" style="position: relative; display: inline-block;">
       <img src="logo.png" alt="Logo" class="logo" />
       <div class="logo-particles" id="logoParticles"></div>
+    <div class="opacity-slider-container">
+      <label for="opacitySlider"></label>
+      <input type="range" id="opacitySlider" min="0" max="100" value="100">
+    </div>
+
     </div>
   </header>
 
@@ -45,10 +50,23 @@
     <a href="livros/livro18.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro18.png" alt="Livro 18"></a>
     <a href="livros/livro19.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro19.png" alt="Livro 19"></a>
     <a href="livros/livro20.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro20.png" alt="Livro 20"></a>
-    <a href="livros/livro21.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro21.png" alt="Livro 21"></a>
-    <a href="livros/livro22.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro22.png" alt="Livro 22"></a>
-    <a href="livros/livro23.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro23.jpg" alt="Livro 23"></a>
+	<a href="livros/livro21.pdf" target="_blank" data-asmr-src="audios/page-turn-1.mp3"><img src="capas/livro21.jpg" alt="Livro 21"></a>
+    <a href="livros/livro22.pdf" target="_blank" data-asmr-src="audios/page-turn-2.mp3"><img src="capas/livro22.jpg" alt="Livro 22"></a>
+    <a href="livros/livro23.pdf" target="_blank" data-asmr-src="audios/page-turn-3.mp3"><img src="capas/livro23.png" alt="Livro 23"></a>
     <a href="livros/livro24.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro24.png" alt="Livro 24"></a>
+    <a href="livros/livro25.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro25.png" alt="Livro 25"></a>
+    <a href="livros/livro26.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro26.png" alt="Livro 26"></a>
+    <a href="livros/livro27.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro27.png" alt="Livro 27"></a>
+    <a href="livros/livro28.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro28.png" alt="Livro 28"></a>
+    <a href="livros/livro29.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro29.png" alt="Livro 29"></a>
+    <a href="livros/livro30.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro30.png" alt="Livro 30"></a>
+    <a href="livros/livro31.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro31.png" alt="Livro 31"></a>
+    <a href="livros/livro32.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro32.png" alt="Livro 32"></a>
+    <a href="livros/livro33.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro33.png" alt="Livro 33"></a>
+    <a href="livros/livro34.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro34.png" alt="Livro 34"></a>
+    <a href="livros/livro35.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro35.png" alt="Livro 35"></a>
+    <a href="livros/livro36.pdf" target="_blank" data-asmr-src="audios/page-turn-4.mp3"><img src="capas/livro36.png" alt="Livro 36"></a>
+	
   </section>
 
   <footer>
@@ -270,7 +288,7 @@
     // Dimensões iniciais da logo para cálculo de escala/translação (deve corresponder ao CSS)
     const initialLogoBaseSize = 170; // max-width/height: 120px no CSS (ajuste isso no CSS e aqui)
     const maxLogoScale = 4; // Escala máxima que a logo pode atingir
-    const scaleSpeedFactor = 0.005; // Velocidade com que a logo escala ao scrollar (mais lento)
+    const scaleSpeedFactor = 0.006; // Velocidade com que a logo escala ao scrollar (mais lento)
 
     // Variáveis para o movimento vertical da logo
     let logoTranslateY = 0; // A quantidade de pixels que a logo deve se mover para baixo
@@ -279,10 +297,9 @@
 
     // Variáveis para a rotação da logo ao scroll
     let scrollRotationSpeed = 0; // Velocidade de rotação atual (graus por frame)
-    const scrollRotationFactor = 0.06; // Quão rápido a logo gira com o scroll (quando a rotação é ativa)
-    const scrollRotationDampening = 0.97; // Fator de desaceleração da rotação (era 0.99)
-    let scrollTimeout;  
-    let animationFrameId; 
+    const scrollRotationFactor = 0.07; // Quão rápido a logo gira com o scroll (quando a rotação é ativa)
+    const scrollRotationDampening = 0.99; // Fator de desaceleração da rotação (era 0.99)
+    let animationFrameId = null; // Changed to null for clearer state management
 
     // Variável para evitar conflito com a rotação de 180° no hover
     let isHoverRotationActive = false;
@@ -308,18 +325,38 @@
 
     // Função para animar a rotação contínua da logo quando o scroll para
     function animateLogoRotation() {
-        if (Math.abs(scrollRotationSpeed) > 0.005) { // Continua animando se a velocidade for detectável (limiar menor)
+        let shouldContinueAnimation = false;
+
+        // 1. Handle active scroll rotation (dampening)
+        if (Math.abs(scrollRotationSpeed) > 0.005) {
             currentLogoRotation += scrollRotationSpeed;
-            scrollRotationSpeed *= scrollRotationDampening; // Reduz a velocidade de rotação gradualmente
-            applyLogoTransform(); 
+            scrollRotationSpeed *= scrollRotationDampening;
+            shouldContinueAnimation = true;
+        } else {
+            scrollRotationSpeed = 0;
+        }
+
+        // 2. Handle gentle return to nearest 0/360 if not actively hovering (180deg)
+        if (scrollRotationSpeed === 0 && !isHoverRotationActive) {
+            const angleRemainder = currentLogoRotation % 360;
+            const targetAngle = Math.round(currentLogoRotation / 360) * 360;
+
+            if (Math.abs(angleRemainder) > 0.5 && Math.abs(angleRemainder) < 359.5) { 
+                currentLogoRotation += (targetAngle - currentLogoRotation) * 0.05; 
+                shouldContinueAnimation = true;
+            } else {
+                currentLogoRotation = targetAngle;
+            }
+        }
+
+        applyLogoTransform();
+
+        if (shouldContinueAnimation) {
             animationFrameId = requestAnimationFrame(animateLogoRotation);
         } else {
-            scrollRotationSpeed = 0; 
-            cancelAnimationFrame(animationFrameId);
-            // Only snap to 0 if rotation is negligible and not being controlled by hover
-            if (Math.abs(currentLogoRotation % 360) < 0.1 && !isHoverRotationActive) {
-                currentLogoRotation = 0;
-                applyLogoTransform(); // Ensure it snaps to 0 if it was almost there
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
             }
         }
     }
@@ -387,22 +424,12 @@
             logo.style.transition = `transform ${logoRotationDuration}s ease-out`; 
 
             // If hover rotation was active, reverse it.
-            // Then, reset to a clean multiple of 360 degrees or exactly 0.
             if (isHoverRotationActive) {
                 isHoverRotationActive = false;
-                currentLogoRotation -= logoHoverRotationDegrees; // Reverse the last 180 deg rotation
+                currentLogoRotation -= logoHoverRotationDegrees; 
             }
             
-            // Normalize currentLogoRotation to be a multiple of 360 to smoothly return to an "original facing" position
-            // This ensures it spins back to the nearest 0, 360, 720, etc.
-            currentLogoRotation = Math.round(currentLogoRotation / 360) * 0;
-
-            // Reset scale and translation values to their initial states
-            currentScrollScale = 1;
-            logoTranslateY = 0;
-            galleryTranslateY = 0;
-
-            // Apply all transformations for a smooth return
+            // Apply transitions for a smooth appearance, without resetting values.
             logoContainer.style.transition = `transform 1.8s ease-out`; 
             const gallery = document.querySelector('.galeria');
             if (gallery) {
@@ -420,20 +447,23 @@
                 logoParticlesContainer.innerHTML = '';
                 isSparkAnimating = false;
             }
+            // Ensure animateLogoRotation starts/continues to settle rotation if needed after mouseleave
+            if (animationFrameId === null) { // Only start if not already running
+                animateLogoRotation();
+            }
         });
 
         // --- Handle mouse wheel scroll over the logo ---
         logo.addEventListener('wheel', (event) => {
             event.preventDefault(); 
 
-            // Set short transitions for responsiveness during scroll
-            logo.style.transition = `transform 2s ease-out`; 
-            logoContainer.style.transition = `transform 2s ease-out`;
-            
-            const gallery = document.querySelector('.galeria');
-            if (gallery) {
-                gallery.style.transition = `transform 2s ease-out`; 
-            }
+            // REMOVIDO: Transições CSS curtas aqui. Deixe o requestAnimationFrame gerenciar a suavidade.
+            // logo.style.transition = `transform 0.1s ease-out`; 
+            // logoContainer.style.transition = `transform 0.1s ease-out`;
+            // const gallery = document.querySelector('.galeria');
+            // if (gallery) {
+            //     gallery.style.transition = `transform 0.1s ease-out`; 
+            // }
 
             const scrollAmount = -event.deltaY; // Negative for scroll up, Positive for scroll down
 
@@ -443,46 +473,44 @@
 
             // 2. Logic for ROTATION on scroll
             const currentLogoYProgress = (logoTranslateY / maxLogoTranslateYValue);
-
             let dynamicRotationFactor = 0;
+
+            // Altere a condição e a lógica para garantir rotação suave desde o início
+            if (currentLogoYProgress > 0) { // Se a logo começou a descer
+                // Rotação inicial mais suave e gradual (multiplicada por 2 para acelerar a transição)
+                dynamicRotationFactor = scrollRotationFactor * Math.min(1, currentLogoYProgress * 2); 
+            }
+            // Mantenha o limite superior de onde a rotação é total
             if (currentLogoYProgress >= 0.25) { 
                 const rotationProgress = Math.min(1, (currentLogoYProgress - 0.25) / 0.75); 
                 dynamicRotationFactor = scrollRotationFactor * rotationProgress;
             }
 
-            if (dynamicRotationFactor > 0 || Math.abs(scrollRotationSpeed) > 0.005) {
-                currentLogoRotation += (scrollAmount * dynamicRotationFactor);  // Add to current rotation
+            if (dynamicRotationFactor > 0) {
+                currentLogoRotation += (scrollAmount * dynamicRotationFactor);  
                 scrollRotationSpeed = (scrollAmount * dynamicRotationFactor); 
             } else {
-                if (Math.abs(scrollRotationSpeed) > 0.005) { 
-                    scrollRotationSpeed *= scrollRotationDampening; 
+                // Se dynamicRotationFactor for 0 (logo não desceu o suficiente),
+                // ainda podemos aplicar uma rotação mínima para iniciar o movimento.
+                if (Math.abs(scrollAmount) > 0) { // Se houve scroll, mesmo que pequeno
+                    scrollRotationSpeed = (scrollAmount * 0.005); // Um fator bem pequeno para iniciar
                 } else {
-                    scrollRotationSpeed = 0; 
-                }
-
-                // If not actively scrolling or hovering, gently bring rotation towards the nearest multiple of 360
-                // This helps avoid tiny residual rotations but doesn't instantly snap.
-                if (Math.abs(currentLogoRotation % 360) > 0.1 && !isHoverRotationActive) { 
-                     currentLogoRotation *= 0.99; 
-                } else if (!isHoverRotationActive) {
-                    currentLogoRotation = Math.round(currentLogoRotation / 360) * 360; // Snap to nearest 360 multiple
+                    scrollRotationSpeed *= scrollRotationDampening; 
+                    if (Math.abs(scrollRotationSpeed) < 0.005) { 
+                        scrollRotationSpeed = 0; 
+                    }
                 }
             }
 
-            clearTimeout(scrollTimeout);
-            scrollTimeout = setTimeout(() => {
-                if (Math.abs(scrollRotationSpeed) > 0.005) { 
-                    cancelAnimationFrame(animationFrameId); 
-                    animateLogoRotation();
-                } else {
-                    scrollRotationSpeed = 0; 
-                    cancelAnimationFrame(animationFrameId); 
-                }
-            }, 100); 
+            // Garante que animateLogoRotation esteja sempre rodando para lidar com rotação e assentamento
+            if (animationFrameId === null) {
+                animateLogoRotation();
+            }
 
             applyLogoTransform();
             applyGalleryTransform();
 
+            // Spark logic
             if (currentScrollScale > 1.1) { 
                 if (sparkTimer) clearTimeout(sparkTimer);
                 if (isSparkAnimating) {
@@ -618,6 +646,46 @@
       });
     }
 
+    // --- Função para cálculo de distância entre mouse e elemento ---
+    // Retorna a distância do ponto (mouseX, mouseY) até a borda mais próxima do elemento.
+    // Se o ponto estiver dentro do elemento, retorna 0.
+    function getDistanceToElement(mouseX, mouseY, element) {
+        const rect = element.getBoundingClientRect();
+        
+        const dx = Math.max(rect.left - mouseX, 0, mouseX - rect.right);
+        const dy = Math.max(rect.top - mouseY, 0, mouseY - rect.bottom);
+
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    // --- Nova função para controlar a visibilidade do slider de opacidade ---
+    function setupOpacitySliderVisibility() {
+        const opacitySliderContainer = document.querySelector('.opacity-slider-container');
+        if (!opacitySliderContainer) return;
+
+        const triggerDistance = 20; // Distância em pixels para ativar/desativar
+
+        document.addEventListener('mousemove', (e) => {
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+
+            const distance = getDistanceToElement(mouseX, mouseY, opacitySliderContainer);
+
+            if (distance <= triggerDistance) {
+                // Mouse está perto ou sobre o slider
+                opacitySliderContainer.style.opacity = '1';
+                opacitySliderContainer.style.visibility = 'visible';
+                opacitySliderContainer.style.pointerEvents = 'auto'; // Habilita interações
+            } else {
+                // Mouse está longe do slider
+                opacitySliderContainer.style.opacity = '0';
+                opacitySliderContainer.style.visibility = 'hidden';
+                opacitySliderContainer.style.pointerEvents = 'none'; // Desabilita interações
+            }
+        });
+    }
+
+
     // --- Função para embaralhar um array (Fisher-Yates) ---
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -648,6 +716,24 @@
       setupCustomCursor();
       setupLogoEffect();
       setupBookSelectionEffect();
+      animateLogoRotation(); // Inicializa o loop de animação da logo para assentamento
+      
+      // NOVA CHAMADA: Configura a visibilidade do slider de opacidade
+      setupOpacitySliderVisibility(); 
+
+      const opacitySlider = document.getElementById('opacitySlider');
+      if (opacitySlider) {
+        const galleryImages = document.querySelectorAll('.galeria img');
+		const galleryLinks = document.querySelectorAll('.galeria a');
+		
+        opacitySlider.addEventListener('input', () => {
+          const opacity = opacitySlider.value / 100;
+          galleryImages.forEach(img => img.style.opacity = opacity);
+		  galleryLinks.forEach(link => link.style.setProperty('--shadow-opacity', opacity-50));
+		  
+        });
+      }
+
     });
   </script>
 </body>
