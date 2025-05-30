@@ -5,13 +5,29 @@
   box-sizing: border-box;
 }
 
-body {
+html, body { /* Altere de apenas 'body' para 'html, body' */
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box; /* Garante que padding e border sejam incluídos na largura/altura */
+
   font-family: 'Inter', sans-serif;
   background: linear-gradient(135deg, #0b0b0d, #1a1a1f);
   color: #e0e0e0;
-  overflow-x: hidden;
+  overflow-x: hidden; /* Mantém a ocultação do scroll horizontal */
   position: relative;
   line-height: 1.6;
+
+  /* NOVAS LINHAS PARA OCULTAR O SCROLL E MANTER A FUNÇÃO */
+  overflow-y: scroll; /* Garante que a rolagem esteja sempre presente, mesmo que o conteúdo não exceda */
+  scrollbar-width: none; /* Para Firefox */
+  -ms-overflow-style: none;  /* Para IE/Edge mais antigos */
+}
+
+/* Esconde a barra de rolagem para navegadores Webkit (Chrome, Safari, Edge, Opera) */
+html::-webkit-scrollbar, /* Adicione esta linha */
+body::-webkit-scrollbar {
+  width: 0px;  /* Largura da barra de rolagem vertical */
+  height: 0px; /* Altura da barra de rolagem horizontal (se aplicável) */
 }
 
 /* === PARTÍCULAS DE FUNDO E ANIMAÇÕES === */
@@ -96,7 +112,8 @@ body::before {
 header {
   text-align: center; padding: 3rem 1rem;
   box-shadow: 0 0 40px rgba(255, 255, 255, 0);
-  position: relative; z-index: 1;
+  position: relative; /* ESSENCIAL para o position: absolute do slider */
+  z-index: 1;
 }
 header img.logo {
   max-width: 170px; margin-bottom: 0rem;
@@ -145,6 +162,68 @@ header img.logo {
   }
 }
 
+/* SLIDER DE OPACIDADE - ALTERAÇÕES AQUI */
+.opacity-slider-container {
+  /* Propriedades para tirá-lo do fluxo */
+  position: absolute; /* ESSENCIAL: tira do fluxo normal */
+  top: 50%; /* Tenta centralizar verticalmente em relação ao header */
+  transform: translateY(-50%); /* Ajuste fino para centralização vertical */
+  right: -500px; /* Posição à direita, ajuste conforme necessário. Use um valor positivo. */
+  cursor: none; /* OCULTA O CURSOR DO SISTEMA AQUI */
+
+  /* Seus estilos existentes (mantidos e reorganizados para clareza) */
+  display: flex;
+  align-items: center;
+  gap: 0rem; /* Ajustado para 0.5rem para um pequeno espaço */
+  /* margin-top e margin-left removidos, pois position: absolute já controla */
+  color: #ccc;
+  font-size: 0.95rem;
+  opacity: 0.4;
+  font-family: 'Inter', sans-serif;
+}
+
+.opacity-slider-container:hover {
+  background-color: rgba(207, 169, 69, 0.2);
+}
+
+.opacity-slider-container input[type="range"] {
+  width: 140px;
+  height: 3px;
+  -webkit-appearance: none; /* Garante consistência em navegadores Webkit */
+  appearance: none; /* Propriedade padrão para compatibilidade */
+  background: #333;
+  border-radius: 5px; /* Deixei 5px para combinar com o container */
+  outline: none;
+   opacity: 0.4;
+  transition: background 0.3s ease;
+  cursor: none; /* OCULTA O CURSOR DO SISTEMA AQUI TAMBÉM */
+}
+.opacity-slider-container input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 6px; /* Aumentei para 14px para ser mais fácil de clicar/arrastar */
+  height: 6px; /* Aumentei para 14px */
+  background: #ffffff;
+  opacity: 0.6;
+  border-radius: 50%;
+  cursor: none; /* OCULTA O CURSOR DO SISTEMA AQUI */
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
+  margin-top: -1.5px; /* Ajuste para centralizar verticalmente o thumb na trilha */
+}
+.opacity-slider-container input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: #cfa945;
+  border-radius: 50%;
+  cursor: none; /* OCULTA O CURSOR DO SISTEMA AQUI */
+  box-shadow: 0 0 4px rgba(0,0, 0, 0.6);
+}
+
+/* Garante que as imagens da galeria tenham uma transição de opacidade suave */
+.galeria img {
+    transition: filter 0.5s ease-in-out, transform 0.6s ease-in-out, box-shadow 0.6s ease-in-out, opacity 0.3s ease-out; /* Adicionado opacity */
+}
+
 
 /* === GALERIA E EFEITO DE SELEÇÃO DE LIVROS === */
 .galeria {
@@ -155,8 +234,8 @@ header img.logo {
 .galeria a {
   display: block; border-radius: 16px; overflow: visible;
   /* Ajuste para transições mais suaves - Aumentei o tempo */
-  transition: transform 2.4s cubic-bezier(0.25, 0.1, 0.25, 1), /* Suavização para o zoom e translateY do próprio item */
-              margin 0.4s cubic-bezier(0.25, 0.1, 0.25, 1),   /* Para os empurrões laterais */
+  transition: transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1), /* Suavização para o zoom e translateY do próprio item */
+              margin 0.4s cubic-bezier(0.25, 0.1, 0.25, 1),    /* Para os empurrões laterais */
               box-shadow 0.5s ease-in-out;
   position: relative;
   /* Nova animação de flutuação sutil */
@@ -167,9 +246,9 @@ header img.logo {
 /* Keyframes para a flutuação sutil dos livros */
 @keyframes bookSubtleFloat {
     0% { transform: translateY(0px) rotate(0deg); }
-    25% { transform: translateY(-3px) rotate(0.1deg); }
-    50% { transform: translateY(0px) rotate(-0.1deg); }
-    75% { transform: translateY(2px) rotate(0.2deg); }
+    25% { transform: translateY(-3px) rotate(0.5deg); }
+    50% { transform: translateY(0px) rotate(-0.5deg); }
+    75% { transform: translateY(2px) rotate(0.5deg); }
     100% { transform: translateY(0px) rotate(0deg); }
 }
 
@@ -182,7 +261,7 @@ header img.logo {
                               rgba(255, 215, 0, 0) 25%,
                               rgba(207, 169, 69, 0) 50%,
                               transparent 75%);
-  border-radius: 24px; opacity: 0;
+  border-radius: 24px; opacity: 0; /* CORRIGIDO: SEMPRE INVISÍVEL POR PADRÃO */
   transition: opacity 0.8s ease-in-out;
   z-index: -1;
   animation: subtleAuraPulse 4s ease-in-out infinite;
@@ -190,17 +269,17 @@ header img.logo {
 @keyframes subtleAuraPulse {
   0%, 100% {
     background: radial-gradient(ellipse 120% 120% at center,
-                                 rgba(207, 169, 69, 0) 0%,
-                                 rgba(255, 215, 0, 0) 25%,
-                                 rgba(207, 169, 69, 0) 50%,
-                                 transparent 75%);
+                                rgba(207, 169, 69, 0) 0%,
+                                rgba(255, 215, 0, 0) 25%,
+                                rgba(207, 169, 69, 0) 50%,
+                                transparent 75%);
   }
   50% {
     background: radial-gradient(ellipse 130% 130% at center,
-                                 rgba(207, 169, 69, 0) 0%,
-                                 rgba(255, 215, 0, 0) 25%,
-                                 rgba(207, 169, 69, 0) 50%,
-                                 transparent 75%);
+                                rgba(207, 169, 69, 0) 0%,
+                                rgba(255, 215, 0, 0) 25%,
+                                rgba(207, 169, 69, 0) 50%,
+                                transparent 75%);
   }
 }
 
@@ -212,15 +291,16 @@ header img.logo {
 .galeria a:hover,
 .galeria a.selected-book {
   transform: scale(1.1) translateY(-10px);
-  box-shadow: 0 8px 25px rgba(207, 169, 69, 0.15),
-              0 0 8px rgba(255, 215, 0, 0.08);
+  /* AQUI É ONDE VAMOS USAR A VARIÁVEL DE OPACIDADE */
+  box-shadow: 0 8px 25px rgba(207, 169, 69, var(--shadow-opacity, 0.15)), /* Primeiro shadow com variável */
+              0 0 8px rgba(255, 215, 0, var(--shadow-opacity, 0.08));    /* Segundo shadow com variável */
   animation-play-state: paused;
   z-index: 10;
 }
 
 .galeria a.selected-book::before,
 .galeria a:hover::before {
-  opacity: 1;
+  opacity: var(--halo-opacity, 1); /* MANTÉM: USA A VARIÁVEL DE OPACIDADE DO SLIDER */
 }
 
 .galeria img {
@@ -230,6 +310,7 @@ header img.logo {
               transform 0.6s ease-in-out,
               box-shadow 0.6s ease-in-out;
   filter: brightness(0.9) saturate(0.8);
+  opacity: var(--image-opacity, 1); /* Adiciona a variável de opacidade para as imagens */
 }
 
 .galeria a:hover img,
@@ -335,4 +416,20 @@ footer {
   /* Ajuste para o empurrão vertical no mobile */
   .galeria a.pushed-up { transform: translateY(-15px); }
   .galeria a.pushed-down { transform: translateY(15px); }
+
+  /* RESPONSIVIDADE DO SLIDER EM TELAS MENORES */
+  .opacity-slider-container {
+    position: relative; /* Volta para relative no mobile para seguir o fluxo */
+    width: 100%; /* Ocupa a largura total */
+    justify-content: center; /* Centraliza o conteúdo (label + slider) */
+    right: auto; /* Remove o posicionamento absoluto da direita */
+    left: auto; /* Remove o posicionamento absoluto da esquerda */
+    top: auto; /* Remove o posicionamento absoluto do topo */
+    transform: none; /* Remove o translateY */
+    margin-top: 1rem; /* Adiciona uma margem superior para separação */
+    padding: 8px 10%; /* Ajusta o padding para telas menores */
+  }
+  .opacity-slider-container input[type="range"] {
+    width: 70%; /* Ajusta a largura do slider em telas menores */
+  }
 }
