@@ -623,13 +623,13 @@
             }
 
             if (dynamicRotationFactor > 0) {
-                currentLogoRotation += (scrollAmount * dynamicRotationFactor);  
-                scrollRotationSpeed = (scrollAmount * dynamicRotationFactor); 
+                currentLogoRotation -= (scrollAmount * dynamicRotationFactor);  
+                scrollRotationSpeed = -(scrollAmount * dynamicRotationFactor); 
             } else {
                 // Se dynamicRotationFactor for 0 (logo não desceu o suficiente),
                 // ainda podemos aplicar uma rotação mínima para iniciar o movimento.
                 if (Math.abs(scrollAmount) > 0) { // Se houve scroll, mesmo que pequeno
-                    scrollRotationSpeed = (scrollAmount * 0.005); // Um fator bem pequeno para iniciar
+                    scrollRotationSpeed = -(scrollAmount * 0.005); // Um fator bem pequeno para iniciar
                 } else {
                     scrollRotationSpeed *= scrollRotationDampening; 
                     if (Math.abs(scrollRotationSpeed) < 0.005) { 
