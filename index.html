@@ -504,7 +504,7 @@
     // Dimensões iniciais da logo para cálculo de escala/translação (deve corresponder ao CSS)
     const initialLogoBaseSize = 170; // max-width/height: 120px no CSS (ajuste isso no CSS e aqui)
     const maxLogoScale = 3.7; // Escala máxima que a logo pode atingir
-    const scaleSpeedFactor = 0.005; // Velocidade com que a logo escala ao scrollar (mais lento)
+    const scaleSpeedFactor = 0.003; // Velocidade com que a logo escala ao scrollar (mais lento)
 
     // Variáveis para o movimento vertical da logo
     let logoTranslateY = 0; // A quantidade de pixels que a logo deve se mover para baixo
@@ -513,7 +513,7 @@
 
     // Variáveis para a rotação da logo ao scroll
     let scrollRotationSpeed = 0; // Velocidade de rotação atual (graus por frame)
-    const scrollRotationFactor = 0.06; // Quão rápido a logo gira com o scroll (quando a rotação é ativa)
+    const scrollRotationFactor = 0.05; // Quão rápido a logo gira com o scroll (quando a rotação é ativa)
     const scrollRotationDampening = 0.99; // Fator de desaceleração da rotação (era 0.99)
     let animationFrameId = null; // Changed to null for clearer state management
 
@@ -590,7 +590,7 @@
         const logoContainer = document.querySelector('.logo-container');
         const logoParticlesContainer = document.getElementById('logoParticles');
         const logoHoverRotationDegrees = 180;  
-        const logoRotationDuration = 1.9; 
+        const logoRotationDuration = 2.3; 
         let isSparkAnimating = false;
         let sparkTimer;
 
@@ -604,12 +604,12 @@
                 isHoverRotationActive = true;
                 // Set transition BEFORE updating currentLogoRotation to ensure smooth animation
                 logo.style.transition = `transform ${logoRotationDuration}s ease-out`;
-                currentLogoRotation += logoHoverRotationDegrees; 
+                currentLogoRotation -= logoHoverRotationDegrees; 
                 applyLogoTransform();
                 // After the main hover rotation transition, set a faster transition for subsequent changes
                 setTimeout(() => {
                     if (isHovering && currentScrollScale < 1.05) { 
-                        logo.style.transition = `transform 0.4s ease-out`;
+                        logo.style.transition = `transform 2s ease-out`;
                     }
                 }, logoRotationDuration * 1000); 
             }
