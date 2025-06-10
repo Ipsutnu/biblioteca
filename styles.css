@@ -397,39 +397,124 @@ footer {
 
 /* === RESPONSIVIDADE === */
 @media (max-width: 768px) {
-  * { cursor: auto !important; }
-  .custom-cursor { display: none; }
-  .galeria { gap: 1rem; padding: 2rem 1rem; }
-  .galeria img { width: 220px; }
-
+  .galeria a,
   .galeria a:hover,
   .galeria a.selected-book {
-    transform: scale(1.06) translateY(-6px);
+    transform: none !important;
+    box-shadow: none !important;
+    animation: none !important;
+    min-width: 0 !important; /* ADICIONADO: Garante que o item possa encolher */
   }
-  .galeria a:hover img,
-  .galeria a.selected-book img {
-    transform: scale(1.07);
-  }
-  /* Ajuste para o empurrar em telas menores, se necessário */
-  .galeria a.pushed-aside-right { margin-right: 15px; }
-  .galeria a.pushed-aside-left { margin-left: 15px; }
-  /* Ajuste para o empurrão vertical no mobile */
-  .galeria a.pushed-up { transform: translateY(-15px); }
-  .galeria a.pushed-down { transform: translateY(15px); }
 
-  /* RESPONSIVIDADE DO SLIDER EM TELAS MENORES */
-  .opacity-slider-container {
-    position: relative; /* Volta para relative no mobile para seguir o fluxo */
-    width: 100%; /* Ocupa a largura total */
-    justify-content: center; /* Centraliza o conteúdo (label + slider) */
-    right: auto; /* Remove o posicionamento absoluto da direita */
-    left: auto; /* Remove o posicionamento absoluto da esquerda */
-    top: auto; /* Remove o posicionamento absoluto do topo */
-    transform: none; /* Remove o translateY */
-    margin-top: 1rem; /* Adiciona uma margem superior para separação */
-    padding: 8px 10%; /* Ajusta o padding para telas menores */
+  .galeria a::before {
+    display: none !important;
   }
+
+  .galeria img {
+    transform: none !important;
+    filter: brightness(1) saturate(1) contrast(1) !important;
+    box-shadow: none !important;
+    min-width: 0 !important; /* ADICIONADO: Garante que a imagem possa encolher */
+  }
+  /* Desativa efeitos visuais complexos */
+  .particles, .mini-particles, .extra-particles,
+  .light-waves, .asmr-gradients, .custom-cursor {
+    display: none !important;
+  }
+  
+  /* Reset da logo */
+  .logo-container, .logo {
+    transform: none !important;
+    transition: none !important;
+  }
+  
+  .galeria a.pushed-aside-left,
+  .galeria a.pushed-aside-right {
+    margin: 0 !important;
+  }
+  
+  /* Layout de 2 colunas para galeria */
+  .galeria {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 1rem !important;
+    padding: 1rem !important;
+    width: 100% !important;
+  }
+  
+  .galeria a {
+    width: auto !important; /* Permite que o item ocupe o espaço do grid */
+    max-width: 100% !important; /* Garante que não exceda o espaço disponível na célula do grid */
+    margin: 0 !important;
+    padding: 0 !important;
+    animation: none !important;
+  }
+  
+  .galeria img {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  
+  /* Efeitos simplificados para mobile */
+  .galeria a:hover,
+  .galeria a.selected-book {
+    transform: scale(1.05) !important;
+  }
+  
+  /* Remove efeitos de empurrão */
+  .galeria a.pushed-aside-right,
+  .galeria a.pushed-aside-left,
+  .galeria a.pushed-up,
+  .galeria a.pushed-down {
+    margin: 0 !important;
+    transform: none !important;
+  }
+  
+  /* Estilos específicos para a logo em mobile */
+  .logo {
+    max-width: 120px !important;
+    margin: 0 auto !important;
+    filter: drop-shadow(0 0 4px #cfa945aa) !important;
+  }
+  
+  .logo-container {
+    text-align: center;
+    padding: 1rem 0 !important;
+  }
+  
+  .logo-particles {
+    display: none !important;
+  }
+  
+  /* Ajustes do header */
+  header {
+    padding: 1rem !important;
+  }
+  
+  /* Ajuste do slider para mobile */
+  .opacity-slider-container {
+	  display: none !important; /* Oculta o slider no mobile */
+    position: relative;
+    width: 100%;
+    justify-content: center;
+    right: auto;
+    left: auto;
+    top: auto;
+    transform: none;
+    margin-top: 1rem;
+    padding: 8px 10%;
+  }
+  
   .opacity-slider-container input[type="range"] {
-    width: 70%; /* Ajusta a largura do slider em telas menores */
+    width: 70%;
+  }
+
+  /* NOVO: Ajustes específicos para telas muito pequenas (320px a 425px) */
+  @media (max-width: 425px) {
+    .galeria {
+      padding: 0.5rem !important; /* Reduz o preenchimento lateral para dar mais espaço */
+      gap: 0.5rem !important; /* Reduz o espaçamento entre as imagens */
+    }
   }
 }
