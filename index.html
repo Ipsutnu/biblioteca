@@ -250,9 +250,9 @@
     let mouseX = 0;
     let mouseY = 0;
     const attractionRadius = 150;
-    const orbitRadiusRange = { min: 30, max: 90 };
+    const orbitRadiusRange = { min: 30, max: 100 };
     const attractionStrength = 0.001;
-    const orbitSpeed = 0.03;
+    const orbitSpeed = 0.025;
     const dampening = 0.95;
 
     let allParticles = [];  
@@ -419,12 +419,12 @@
     
     // Variáveis para o movimento vertical da galeria e seu fator de movimento
     let galleryTranslateY = 0;
-    const galleryMovementFactor = 200; // Quão mais a galeria se move para baixo (original: 150)
+    const galleryMovementFactor = 220; // Quão mais a galeria se move para baixo (original: 150)
 
     // Dimensões iniciais da logo para cálculo de escala/translação (deve corresponder ao CSS)
     const initialLogoBaseSize = 170; // max-width/height: 120px no CSS (ajuste isso no CSS e aqui)
-    const maxLogoScale = 4; // Escala máxima que a logo pode atingir
-    const scaleSpeedFactor = 0.006; // Velocidade com que a logo escala ao scrollar (mais lento)
+    const maxLogoScale = 3.7; // Escala máxima que a logo pode atingir
+    const scaleSpeedFactor = 0.005; // Velocidade com que a logo escala ao scrollar (mais lento)
 
     // Variáveis para o movimento vertical da logo
     let logoTranslateY = 0; // A quantidade de pixels que a logo deve se mover para baixo
@@ -433,7 +433,7 @@
 
     // Variáveis para a rotação da logo ao scroll
     let scrollRotationSpeed = 0; // Velocidade de rotação atual (graus por frame)
-    const scrollRotationFactor = 0.07; // Quão rápido a logo gira com o scroll (quando a rotação é ativa)
+    const scrollRotationFactor = 0.06; // Quão rápido a logo gira com o scroll (quando a rotação é ativa)
     const scrollRotationDampening = 0.99; // Fator de desaceleração da rotação (era 0.99)
     let animationFrameId = null; // Changed to null for clearer state management
 
@@ -601,7 +601,7 @@
             //     gallery.style.transition = `transform 0.1s ease-out`; 
             // }
 
-            const scrollAmount = -event.deltaY; // Negative for scroll up, Positive for scroll down
+            const scrollAmount = event.deltaY; // Negative for scroll up, Positive for scroll down
 
             // 1. Logic to INCREASE/DECREASE logo scale and move gallery
             currentScrollScale += scaleSpeedFactor * -scrollAmount; 
@@ -832,45 +832,87 @@
 
     // --- Inicialização de todos os efeitos quando o DOM estiver carregado ---
     document.addEventListener('DOMContentLoaded', () => {
-      const gallery = document.querySelector('.galeria');
-      const galleryItems = Array.from(gallery.children);
-      
-      shuffleArray(galleryItems);
+  const isMobile = window.innerWidth <= 768;
+  
+  // Só inicializa efeitos complexos se não for mobile
+  if (!isMobile) {
+    const particlesContainer = document.getElementById('particles');
+    const miniParticlesContainer = document.getElementById('miniParticles');
+    const extraParticlesContainer = document.getElementById('extraParticles');
 
-      galleryItems.forEach(item => gallery.appendChild(item));
+    createParticles(particlesContainer, 'particle', 19, 15, 10, 0, 15);
+    createParticles(miniParticlesContainer, 'mini-particle', 60, 20, 15, 0, 20);
+    createParticles(extraParticlesContainer, 'extra-particle', 45, 25, 20, 0, 25);
 
-      const particlesContainer = document.getElementById('particles');
-      const miniParticlesContainer = document.getElementById('miniParticles');
-      const extraParticlesContainer = document.getElementById('extraParticles');
+    animateParticles();
+    setupCustomCursor();
+    setupLogoEffect();
+  }
 
-      createParticles(particlesContainer, 'particle', 19, 15, 10, 0, 15);
-      createParticles(miniParticlesContainer, 'mini-particle', 60, 20, 15, 0, 20);
-      createParticles(extraParticlesContainer, 'extra-particle', 45, 25, 20, 0, 25);
+  // Funcionalidades básicas que funcionam em todos os dispositivos
+  const gallery = document.querySelector('.galeria');
+  const galleryItems = Array.from(gallery.children);
+  shuffleArray(galleryItems);
+  galleryItems.forEach(item => gallery.appendChild(item));
+  setupBookSelectionEffect();
+  setupOpacitySliderVisibility();
+  
+  // Configuração do slider de opacidade
+  const opacitySlider = document.getElementById('opacitySlider');
+  if (opacitySlider) {
+    const galleryImages = document.querySelectorAll('.galeria img');
+    const galleryLinks = document.querySelectorAll('.galeria a');
+    
+    opacitySlider.addEventListener('input', () => {
+      const opacity = opacitySlider.value / 100;
+      galleryImages.forEach(img => img.style.opacity = opacity);
+      galleryLinks.forEach(link => link.style.setProperty('--shadow-opacity', opacity-50));
+    });
+  }
+});
 
-      animateParticles(); 
+ const isMobile = window.matchMedia("(max-width: 768px)").matches;
 
-      setupCustomCursor();
-      setupLogoEffect();
-      setupBookSelectionEffect();
-      animateLogoRotation(); // Inicializa o loop de animação da logo para assentamento
-      
-      // NOVA CHAMADA: Configura a visibilidade do slider de opacidade
-      setupOpacitySliderVisibility(); 
+  if (isMobile) {
+    // Remove elementos visuais pesados
+    const particleContainers = ['particles', 'miniParticles', 'extraParticles', 'logoParticles', 'cursor'];
+    particleContainers.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.remove();
+    });
 
-      const opacitySlider = document.getElementById('opacitySlider');
-      if (opacitySlider) {
-        const galleryImages = document.querySelectorAll('.galeria img');
-		const galleryLinks = document.querySelectorAll('.galeria a');
-		
-        opacitySlider.addEventListener('input', () => {
-          const opacity = opacitySlider.value / 100;
-          galleryImages.forEach(img => img.style.opacity = opacity);
-		  galleryLinks.forEach(link => link.style.setProperty('--shadow-opacity', opacity-50));
-		  
-        });
+    // Anula as funções de efeito
+    window.createParticles = () => {};
+    window.animateParticles = () => {};
+    window.createLogoSparkPath = () => {};
+    window.applyLogoTransform = () => {};
+    window.animateLogoRotation = () => {};
+    window.setupLogoEffect = () => {};
+
+    // Remove custom cursor
+    document.body.classList.add('no-custom-cursor');
+    document.addEventListener('mousemove', e => e.stopPropagation(), true);
+
+    // Desativa efeitos de hover e seleção nos livros
+    const galleryItems = document.querySelectorAll('.galeria a');
+    galleryItems.forEach(a => {
+      a.classList.remove('selected-book');
+      a.style.transform = 'none';
+      a.style.boxShadow = 'none';
+      a.style.animation = 'none';
+
+      const img = a.querySelector('img');
+      if (img) {
+        img.style.transform = 'none';
+        img.style.filter = 'brightness(1) saturate(1) contrast(1)';
+        img.style.boxShadow = 'none';
       }
 
+      // Remove pseudo-elemento ::before via inline style
+      a.style.setProperty('--halo-opacity', '0');
+      a.style.setProperty('--shadow-opacity', '0');
     });
+  }
   </script>
 </body>
 </html>
