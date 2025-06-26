@@ -769,7 +769,7 @@
                 isHoverRotationActive = true;
                 // Set transition BEFORE updating currentLogoRotation to ensure smooth animation
                 logo.style.transition = `transform ${logoRotationDuration}s ease-out`;
-                currentLogoRotation -= logoHoverRotationDegrees; 
+                currentLogoRotation = logoHoverRotationDegrees; 
                 applyLogoTransform();
                 // After the main hover rotation transition, set a faster transition for subsequent changes
                 setTimeout(() => {
